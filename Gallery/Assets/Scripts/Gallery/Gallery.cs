@@ -1,19 +1,23 @@
 using System.Collections.Generic;
+using Gallery.PhotoLoader;
 using LoadOperation;
 using UI.LoadingScreen;
 using UnityEngine;
+using Zenject;
 
 namespace Gallery
 {
-    public class Gallery
+    public class Gallery : IInitializable
     {
-        private readonly LoadingScreen _loadingScreen;
+        private readonly IFactory<LoadingScreen> _loadingScreenFactory;
+        private readonly IPhotoLoader _photoLoader;
         private readonly AppData _appData;
         private GalleryState _state = GalleryState.None;
 
-        public Gallery(LoadingScreen loadingScreen, AppData appData)
+        public Gallery(IFactory<LoadingScreen> loadingScreenFactory, IPhotoLoader photoLoader, AppData appData)
         {
-            _loadingScreen = loadingScreen;
+            _loadingScreenFactory = loadingScreenFactory;
+            _photoLoader = photoLoader;
             _appData = appData;
         }
 
@@ -25,9 +29,15 @@ namespace Gallery
             _state = GalleryState.Loading;
             _appData.PreviewTexture = texture2D;
             var operations = new Queue<ILoadingOperation>();
-            operations.Enqueue(new UnloadSceneOperation(Constants.Scenes.Gallery));
             operations.Enqueue(new LoadSceneOperation(Constants.Scenes.Preview));
-            _loadingScreen.Load(operations);
+            _loadingScreenFactory.Create().Load(operations);
+        }
+
+        public void Initialize()
+        {
+            var operations = new Queue<ILoadingOperation>();
+            operations.Enqueue(new WaitTaskOperation("Грузим картинки...", _photoLoader.LoadNext(12)));
+            _loadingScreenFactory.Create().Load(operations);
         }
 
         private enum GalleryState

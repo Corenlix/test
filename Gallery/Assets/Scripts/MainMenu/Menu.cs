@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using LoadOperation;
 using UI.LoadingScreen;
+using Zenject;
 
 namespace MainMenu
 {
     public class Menu
     {
-        private readonly LoadingScreen _loadingScreen;
+        private readonly IFactory<LoadingScreen> _loadingScreenFactory;
         private MenuState _state = MenuState.None;
 
-        public Menu(LoadingScreen loadingScreen)
+        public Menu(IFactory<LoadingScreen> loadingScreenFactory)
         {
-            _loadingScreen = loadingScreen;
+            _loadingScreenFactory = loadingScreenFactory;
         }
 
         public void LoadGallery()
@@ -21,11 +22,10 @@ namespace MainMenu
         
             _state = MenuState.Loading;
             var operations = new Queue<ILoadingOperation>();
-            operations.Enqueue(new UnloadSceneOperation(Constants.Scenes.MainMenu));
-            operations.Enqueue(new LoadSceneOperation(Constants.Scenes.Gallery));
             operations.Enqueue(new WaitOperation("Сидим...", 1500));
             operations.Enqueue(new WaitOperation("Ждем...", 1500));
-            _loadingScreen.Load(operations);
+            operations.Enqueue(new LoadSceneOperation(Constants.Scenes.Gallery));
+            _loadingScreenFactory.Create().Load(operations);
         }
 
         enum MenuState

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Gallery.PhotoLoader;
 using UI.View;
 using UnityEngine;
@@ -12,7 +11,6 @@ namespace UI.Presenter
         [SerializeField] private PhotoContainerView _view;
         [SerializeField] private PhotoPresenter _photoPresenter;
         [SerializeField] private Transform _container;
-        [SerializeField] private int _startPhotosCount = 4;
         [SerializeField] private int _loadingPhotosCount = 2;
         private IPhotoLoader _photoLoader;
         private Gallery.Gallery _gallery;
@@ -26,28 +24,18 @@ namespace UI.Presenter
             _gallery = gallery;
         }
 
-        private async void Start()
+        private void Start()
         {
             _view.OnDown += OnDown;
-            await LoadPhotos(_startPhotosCount);
+            _photoLoader.Loaded += OnPhotosLoaded;
         }
 
-        private async Task LoadPhotos(int count)
+        private void OnPhotosLoaded(Texture2D[] photos)
         {
-            _loadingDelayIsActive = true;
-            
-            var tasks = new Task<Texture2D>[count];
-            for (var i = 0; i < count; i++)
-                tasks[i] = _photoLoader.LoadNext();
-
-            foreach (var texture in await Task.WhenAll(tasks))
+            foreach (var texture in photos)
             {
                 AddPhoto(texture);
             }
-
-            await Task.Delay(100);
-
-            _loadingDelayIsActive = false;
         }
 
         private void AddPhoto(Texture2D texture)
@@ -62,7 +50,9 @@ namespace UI.Presenter
         private async void OnDown()
         {
             if (_loadingDelayIsActive) return;
-            await LoadPhotos(_loadingPhotosCount);
+            _loadingDelayIsActive = true;
+            await _photoLoader.LoadNext(_loadingPhotosCount);
+            _loadingDelayIsActive = false;
         }
 
         private void OnPreviewRequired(Texture2D texture)

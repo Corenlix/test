@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using LoadOperation;
 using UI.LoadingScreen;
+using Zenject;
 
 namespace Preview
 {
     public class Preview
     {
-        private readonly LoadingScreen _loadingScreen;
+        private readonly IFactory<LoadingScreen> _loadingScreenFactory;
         private PreviewState _state = PreviewState.None;
 
-        public Preview(LoadingScreen loadingScreen)
+        public Preview(IFactory<LoadingScreen> loadingScreenFactory)
         {
-            _loadingScreen = loadingScreen;
+            _loadingScreenFactory = loadingScreenFactory;
         }
 
         public void LoadGallery()
@@ -21,10 +22,8 @@ namespace Preview
 
             _state = PreviewState.Loading;
             var operations = new Queue<ILoadingOperation>();
-            operations.Enqueue(new UnloadSceneOperation(Constants.Scenes.Preview));
             operations.Enqueue(new LoadSceneOperation(Constants.Scenes.Gallery));
-            operations.Enqueue(new WaitOperation("Грузим картинки...", 3000));
-            _loadingScreen.Load(operations);
+            _loadingScreenFactory.Create().Load(operations);
         }
 
         private enum PreviewState

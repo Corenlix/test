@@ -9,7 +9,7 @@ namespace UI.LoadingScreen
         
         public override void InstallBindings()
         {
-            Container.Bind<LoadingScreen>().FromInstance(_loadingScreen).AsSingle();
+            Container.BindIFactory<LoadingScreen>().FromMethod(container => container.InstantiatePrefabForComponent<LoadingScreen>(_loadingScreen));
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Gallery
     {
         public override void InstallBindings()
         {
-            Container.Bind<Gallery>().FromNew().AsSingle();
+            Container.BindInterfacesAndSelfTo<Gallery>().AsSingle();
         }
     }
 }

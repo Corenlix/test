@@ -2,14 +2,12 @@ using System.Collections;
 using LoadOperation;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace UI.LoadingScreen
 {
     public class SceneLoadingScreen : LoadingScreen
     {
-        [SerializeField] private Canvas _root;
         [SerializeField] private TextMeshProUGUI _operationDescriptionText;
         [SerializeField] private TextMeshProUGUI _progressText;
         [SerializeField] private Image _progressFill;
@@ -18,10 +16,6 @@ namespace UI.LoadingScreen
 
         protected override void OnStartLoad()
         {
-            var loadingScreenScene = SceneManager.CreateScene(Constants.Scenes.LoadingScreen);
-            SceneManager.MoveGameObjectToScene(_root.gameObject, loadingScreenScene);
-            SceneManager.MoveGameObjectToScene(new GameObject().AddComponent<Camera>().gameObject, loadingScreenScene);
-            _root.enabled = true;
             StartCoroutine(UpdateProgressBar());
         }
 
@@ -46,16 +40,13 @@ namespace UI.LoadingScreen
 
         protected override void OnFinishLoad()
         {
-            SceneManager.UnloadSceneAsync(Constants.Scenes.LoadingScreen);
+            Destroy(gameObject);
         }
 
         private IEnumerator UpdateProgressBar()
         {
-            while (_root.enabled)
-            {
-                _progressFill.fillAmount = Mathf.Min(_progressFill.fillAmount + Time.deltaTime * _barFillSpeed, _targetFill);
-                yield return null;
-            }
+            _progressFill.fillAmount = Mathf.Min(_progressFill.fillAmount + Time.deltaTime * _barFillSpeed, _targetFill);
+            yield return null;
         }
     }
 }

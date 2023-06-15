@@ -4,22 +4,22 @@ using UnityEngine.SceneManagement;
 
 namespace LoadOperation
 {
-    public class UnloadSceneOperation : ILoadingOperation
+    public class LoadSceneOperation : ILoadingOperation
     {
         public string Description => "Грузим...";
         private readonly string _sceneName;
 
-        public UnloadSceneOperation(string sceneName)
+        public LoadSceneOperation(string sceneName)
         {
             _sceneName = sceneName;
         }
-
+        
         public async Task Load(Action<float> onProgress)
         {
-            var unloadOperation = SceneManager.UnloadSceneAsync(_sceneName);
-            while (!unloadOperation.isDone)
+            var loadOperation = SceneManager.LoadSceneAsync(_sceneName, LoadSceneMode.Single);
+            while (!loadOperation.isDone)
             {
-                onProgress(unloadOperation.progress / 0.9f);
+                onProgress(loadOperation.progress / 0.9f);
                 await Task.Delay(1);
             }
         }
